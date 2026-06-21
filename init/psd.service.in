@@ -10,9 +10,9 @@ After=winbindd.service
 Slice=background.slice
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/bin/profile-sync-daemon startup
-ExecStartPost=/usr/bin/profile-sync-daemon resync
-ExecStop=/usr/bin/profile-sync-daemon unsync
+ExecStart=@BINDIR@/psd startup
+ExecStartPost=@BINDIR@/psd resync
+ExecStop=@BINDIR@/psd unsync
 Environment=LAUNCHED_BY_SYSTEMD=1
 
 [Install]

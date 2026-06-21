@@ -2,7 +2,7 @@ VERSION = 7.03
 PN = profile-sync-daemon
 
 PREFIX ?= /usr
-INITDIR_SYSTEMD = /usr/lib/systemd/user
+INITDIR_SYSTEMD ?= /usr/lib/systemd/user
 BINDIR = $(PREFIX)/bin
 SHAREDIR = $(PREFIX)/share/psd
 MANDIR = $(PREFIX)/share/man/man1
@@ -43,14 +43,19 @@ install-man:
 	$(INSTALL_DATA) doc/psd.1 "$(DESTDIR)$(MANDIR)/psd.1"
 	ln -sf psd.1 "$(DESTDIR)$(MANDIR)/$(PN).1"
 
-install-systemd:
-	$(Q)echo -e '\033[1;32mInstalling systemd files...\033[0m'
+install-systemd: init/psd.service.in init/psd-resync.service.in
+	$(Q)echo -e '\033[1;32mGenerating and installing systemd files...\033[0m'
 	$(INSTALL_DIR) "$(DESTDIR)$(INITDIR_SYSTEMD)"
-	$(INSTALL_DATA) init/psd.service "$(DESTDIR)$(INITDIR_SYSTEMD)/psd.service"
-	$(INSTALL_DATA) init/psd-resync.service "$(DESTDIR)$(INITDIR_SYSTEMD)/psd-resync.service"
+	$(SED) 's|@BINDIR@|$(BINDIR)|' init/psd.service.in > "$(DESTDIR)$(INITDIR_SYSTEMD)/psd.service"
+	$(SED) 's|@BINDIR@|$(BINDIR)|' init/psd-resync.service.in > "$(DESTDIR)$(INITDIR_SYSTEMD)/psd-resync.service"
 	$(INSTALL_DATA) init/psd-resync.timer "$(DESTDIR)$(INITDIR_SYSTEMD)/psd-resync.timer"
 
 install: install-bin install-man install-systemd
+
+user-install:
+	$(MAKE) install \
+	    PREFIX=$(HOME)/.local \
+	    INITDIR_SYSTEMD=$(HOME)/.config/systemd/user
 
 uninstall-bin:
 	$(RM) "$(DESTDIR)$(BINDIR)/$(PN)"
@@ -73,7 +78,13 @@ uninstall-systemd:
 
 uninstall: uninstall-bin uninstall-man uninstall-systemd
 
+user-uninstall:
+	$(MAKE) uninstall \
+	    PREFIX=$(HOME)/.local \
+	    INITDIR_SYSTEMD=$(HOME)/.config/systemd/user
+
 clean:
 	$(RM) -f common/$(PN)
 
-.PHONY: install-bin install-man install-systemd install uninstall-bin uninstall-man uninstall-systemd uninstall clean
+.PHONY: install-bin install-man install-systemd install user-install \
+        uninstall-bin uninstall-man uninstall-systemd uninstall user-uninstall clean

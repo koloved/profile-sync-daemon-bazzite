@@ -37,6 +37,20 @@ Consult the man page or the wiki page: https://wiki.archlinux.org/index.php/Prof
 ## Installation from Source
 To build from source, see the included INSTALL text document.
 
+## Installation on Atomic/Immutable Systems (Bazzite, Fedora Silverblue, etc.)
+On atomic systems where `/usr` is read-only, install to your home directory:
+
+```bash
+git clone https://github.com/graysky2/profile-sync-daemon
+cd profile-sync-daemon
+make
+make user-install
+systemctl --user daemon-reload
+systemctl --user enable --now psd.service
+```
+
+This installs everything under `~/.local/` and `~/.config/systemd/user/`.
+
 ## Installation from Distro Packages
 ### Officially Packaged
 * Arch: in the extra [repo](https://archlinux.org/packages/extra/any/profile-sync-daemon/).
