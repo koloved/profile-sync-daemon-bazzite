@@ -5,7 +5,7 @@ Profile-sync-daemon (psd) is a tiny pseudo-daemon designed to manage your browse
 Always backup your browser profile(s) before using psd for the first time.
 
 ## Users of eCryptFS
-User of eCryptFS are encouraged not to use psd unless willing to help troubleshoot suspected browser corruption. See [#158](https://github.com/graysky2/profile-sync-daemon/issues/158).
+User of eCryptFS are encouraged not to use psd unless willing to help troubleshoot suspected browser corruption. See [#158](https://github.com/koloved/profile-sync-daemon-bazzite/issues/158).
 
 ## Supported Browsers
 * Chromium
@@ -41,7 +41,7 @@ To build from source, see the included INSTALL text document.
 On atomic systems where `/usr` is read-only, install to your home directory:
 
 ```bash
-git clone https://github.com/graysky2/profile-sync-daemon
+git clone https://github.com/koloved/profile-sync-daemon-bazzite
 cd profile-sync-daemon
 make
 make user-install
@@ -50,6 +50,28 @@ systemctl --user enable --now psd.service
 ```
 
 This installs everything under `~/.local/` and `~/.config/systemd/user/`.
+
+### Verifying it works
+
+```bash
+# 1. Check service status (should show "active (exited)")
+systemctl --user status psd.service
+
+# 2. Check that overlay mounts are created for your browsers
+mount | grep fuse-overlayfs | grep psd
+
+# 3. Check if your browser profile is now a symlink to tmpfs
+# (for Firefox flatpak as an example)
+ls -la ~/.var/app/org.mozilla.firefox/config/mozilla/firefox/*.default*
+
+# 4. See how much RAM is being used by the overlay mounts
+systemctl --user status psd.service | grep Memory
+
+# 5. Check psd's own runtime directory
+ls -la /run/user/$(id -u)/psd/
+```
+
+If step 1 shows `active (exited)` and step 2 shows your browsers listed — it's working. Your browser profiles are running in RAM. Write `BROWSERS=(firefox-flatpak)` in `~/.config/psd/psd.conf` if you only want to manage specific browsers instead of all detected ones.
 
 ## Installation from Distro Packages
 ### Officially Packaged
