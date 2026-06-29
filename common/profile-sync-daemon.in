@@ -714,10 +714,10 @@ release_inhibit_lock() {
 
 case "$1" in
   p|P|Parse|parse|Preview|preview|debug)
+    ungraceful_state_check
     dep_check
     config_check
     dup_check
-    ungraceful_state_check
     header
     parse
     ;;
@@ -731,11 +731,11 @@ case "$1" in
   startup)
     # target for psd.service's ExecStart= for consistent error handling
     if [[ ! -f $PID_FILE ]]; then
+      ungraceful_state_check
       dep_check
       config_check
       dup_check
       running_check
-      ungraceful_state_check
       [[ $SUSPSYNC -eq 1 ]] && take_inhibit_lock
       echo -e "${BLD}psd startup check successful${NRM}"
     fi
@@ -754,11 +754,11 @@ case "$1" in
     if [[ -f $PID_FILE ]]; then
       do_sync
     else
+      ungraceful_state_check
       dep_check
       config_check
       dup_check
       running_check
-      ungraceful_state_check
       do_sync
       enforce
     fi
